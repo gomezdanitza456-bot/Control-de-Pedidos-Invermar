@@ -271,7 +271,7 @@ td.low{color:var(--danger);font-weight:700}
     const order={'Mañana':0,'Noche':1};
     const sorted=[...sel].sort((a,b)=>b.fecha.localeCompare(a.fecha)||a.turno.localeCompare(b.turno)||order[a.horario]-order[b.horario]);
     $('tblSub').textContent=`${sorted.length} registro${sorted.length>1?'s':''}`;
-    let h='<table><thead><tr><th>Fecha</th><th>Turno</th><th>Horario</th><th class="n">Evisceradas</th><th class="n">Fileteadas</th><th class="n">Porciones (kg)</th><th class="n">% fileteado</th><th class="act"></th></tr></thead><tbody>';
+    let h='<table><thead><tr><th>Fecha</th><th>Turno</th><th>Horario</th><th class="n">Filetes S/V</th><th class="n">Cliente</th><th class="n">Restante (kg)</th><th class="n">% fileteado</th><th class="act"></th></tr></thead><tbody>';
     let cur=null,acc=null;
     const flush=()=>{if(cur)h+=`<tr class="daytot"><td colspan="3">Total ${fDate(cur)}</td><td class="n">${fmt(acc.ev)}</td><td class="n">${fmt(acc.fi)}</td><td class="n">${fmt(acc.po)}</td><td class="n">${pct(acc.fi,acc.ev)}</td><td class="act"></td></tr>`;};
     sorted.forEach(r=>{
