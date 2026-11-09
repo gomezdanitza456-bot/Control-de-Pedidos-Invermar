@@ -231,7 +231,7 @@ td.low{color:var(--danger);font-weight:700}
     const po=sum(sel,'porciones');
     $('kPo').textContent=fmt(po);
     $('kPoSub').textContent=nT?`kg · prom. ${fmt(po/nT)} kg/turno`:'kg';
-    ['A','B'].forEach(t=>{const s=sel.filter(r=>r.turno===t);$('k'+t).textContent=fmt(sum(s,'evisceradas'));$('k'+t+'Sub').textContent=`evisc. · ${fmt(sum(s,'fileteadas'))} filet. · ${fmt(sum(s,'porciones'))} kg porc. · ${s.length} turno${s.length===1?'':'s'}`;});
+    ['A','B'].forEach(t=>{const s=sel.filter(r=>r.turno===t);$('k'+t).textContent=fmt(sum(s,'Filetes S/V'));$('k'+t+'Sub').textContent=`evisc. · ${fmt(sum(s,'Cliente'))} filet. · ${fmt(sum(s,'Kilos'))} kg porc. · ${s.length} turno${s.length===1?'':'s'}`;});
     renderChart(sel);renderTable(sel);
   }
 
