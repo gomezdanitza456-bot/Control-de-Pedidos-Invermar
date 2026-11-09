@@ -1,1 +1,122 @@
 # Control-de-Pedidos-Invermar
+
+import streamlit as pd
+import pandas as pd
+import datetime
+
+# Configuración de la página
+st.set_page_config(page_title="Control de Producción", layout="wide")
+
+# 1. Base de datos simulada en memoria (se mantiene mientras la app corra)
+if 'db_piezas' not in st.session_state:
+    st.session_state.db_piezas = pd.DataFrame(columns=[
+        "ID", "Fecha/Hora", "Cliente", "Tipo de Pieza", "Cantidad", "Operario"
+    ])
+
+# Lista predefinida de clientes y piezas para el taller
+CLIENTES = ["Cliente Alfa S.A.", "Industrias Beta", "Corporación Gamma"]
+PIEZAS = ["Eje Central de 10mm", "Engranaje de Bronce", "Placa de Soporte"]
+
+st.title("🏭 Sistema Simple de Conteo de Piezas")
+
+# Creamos dos pestañas: Una para el taller (operarios) y otra para administración/clientes
+tab_taller, tab_reporte = st.tabs(["⚙️ Panel del Operario", "📊 Vista de Clientes & Reportes"])
+
+# =========================================================================
+# PESTAÑA 1: PANEL DEL OPERARIO (Registro de piezas)
+# =========================================================================
+with tab_taller:
+    st.header("Registrar Nueva Producción")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        cliente_sel = st.selectbox("Selecciona el Cliente", CLIENTES)
+    with col2:
+        pieza_sel = st.selectbox("Tipo de Pieza Procesada", PIEZAS)
+    with col3:
+        operario_nom = st.text_input("Nombre del Operario", value="Operario 1")
+        
+    st.markdown("### ¿Cómo vas a registrar?")
+    col_btn1, col_btn2 = st.columns(2)
+    
+    # Opción A: Registrar lote manualmente
+    with col_btn1:
+        st.subheader("Por Lote")
+        cantidad_lote = st.number_input("Cantidad de piezas terminadas", min_value=1, value=10, step=1)
+        if st.button("💾 Registrar Lote", use_container_width=True):
+            nuevo_registro = {
+                "ID": len(st.session_state.db_piezas) + 1,
+                "Fecha/Hora": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "Cliente": cliente_sel,
+                "Tipo de Pieza": pieza_sel,
+                "Cantidad": cantidad_lote,
+                "Operario": operario_nom
+            }
+            st.session_state.db_piezas = pd.concat([st.session_state.db_piezas, pd.DataFrame([nuevo_registro])], ignore_index=True)
+            st.success(f"¡Lote de {cantidad_lote} piezas registrado con éxito!")
+
+    # Opción B: Registrar pieza por pieza con un botón grande
+    with col_btn2:
+        st.subheader("Pieza por Pieza")
+        st.write("Presiona cada vez que termines una unidad:")
+        if st.button("➕ ¡PIEZA TERMINADA (+1)!", type="primary", use_container_width=True):
+            nuevo_registro = {
+                "ID": len(st.session_state.db_piezas) + 1,
+                "Fecha/Hora": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "Cliente": cliente_sel,
+                "Tipo de Pieza": pieza_sel,
+                "Cantidad": 1,
+                "Operario": operario_nom
+            }
+            st.session_state.db_piezas = pd.concat([st.session_state.db_piezas, pd.DataFrame([nuevo_registro])], ignore_index=True)
+            st.toast("➕ 1 pieza sumada", icon="🤖")
+
+    # Mostrar historial reciente del taller para correcciones
+    st.markdown("---")
+    st.subheader("📝 Últimos registros en tiempo real")
+    if not st.session_state.db_piezas.empty:
+        st.dataframe(st.session_state.db_piezas.tail(5), use_container_width=True)
+    else:
+        st.info("Aún no hay piezas registradas en este turno.")
+
+# =========================================================================
+# PESTAÑA 2: VISTA DE CLIENTES (Métricas y gráficos)
+# =========================================================================
+with tab_reporte:
+    st.header("Panel de Control para Clientes")
+    
+    if st.session_state.db_piezas.empty:
+        st.warning("No hay datos suficientes para generar reportes todavía.")
+    else:
+        # Filtro por cliente
+        cliente_filtro = st.selectbox("Selecciona el cliente para ver sus métricas:", CLIENTES, key="filtro_cliente")
+        
+        # Filtrar el dataframe global
+        df_filtrado = st.session_state.db_piezas[st.session_state.db_piezas["Cliente"] == cliente_filtro]
+        
+        if df_filtrado.empty:
+            st.info(f"No hay registros vigentes para {cliente_filtro}.")
+        else:
+            # Métricas rápidas
+            total_piezas = df_filtrado["Cantidad"].sum()
+            total_lotes = len(df_filtrado)
+            
+            m1, m2 = st.columns(2)
+            m1.metric(label="Total Piezas Procesadas", value=int(total_piezas))
+            m2.metric(label="Órdenes/Lotes Registrados", value=int(total_lotes))
+            
+            # Gráfico de producción por tipo de pieza
+            st.subheader("Distribución por tipo de pieza")
+            df_grafico = df_filtrado.groupby("Tipo de Pieza")["Cantidad"].sum().reset_index()
+            st.bar_chart(data=df_grafico, x="Tipo de Pieza", y="Cantidad")
+            
+            # Descargar los datos en Excel/CSV
+            st.subheader("Descargar Reporte")
+            csv = df_filtrado.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Descargar datos de este cliente en CSV",
+                data=csv,
+                file_name=f"reporte_{cliente_filtro.replace(' ', '_')}.csv",
+                mime='text/csv',
+            )
