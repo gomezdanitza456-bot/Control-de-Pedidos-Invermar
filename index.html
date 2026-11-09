@@ -1,63 +1,348 @@
 # Control-de-Pedidos-Invermar
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Piezas - Taller</title>
-    <!-- Cargamos Tailwind CSS para un diseño moderno y rápido -->
-    <script src="https://jsdelivr.net"></script>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Producción Planta Llau Llao</title>
+<style>
+/* Layout: franja navy con ola de marca, KPIs del acumulado arriba, gráfico diario + formulario lado a lado, registro completo abajo. */
+:root{
+  --navy:#0C2E5C; --gold:#D4AC40; --blue:#1B4B8F;
+  --bg:#EEF2F8; --surface:#FFFFFF; --fg:#0E1E36; --muted:#5A6B85; --line:#D5DDEA;
+  --ev:#1B4B8F; --fi:#D4AC40; --po:#2E7D8C; --chip:#E3EAF5; --danger:#B3261E; --ok:#1E7A46;
+  --head-bg:#0C2E5C; --head-fg:#FFFFFF;
+  --f-display:"Arial Black","Arial Bold",Arial,Helvetica,sans-serif;
+  --f-body:Arial,Helvetica,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#06162D; --surface:#0D2343; --fg:#E8EEF8; --muted:#93A4C0; --line:#1F3A63;
+  --ev:#5E8FD8; --fi:#E2BE5C; --po:#5FC0CF; --chip:#163156; --danger:#FF8A80; --ok:#6FD39A;
+  --head-bg:#0A2448; --head-fg:#FFFFFF; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#06162D; --surface:#0D2343; --fg:#E8EEF8; --muted:#93A4C0; --line:#1F3A63;
+  --ev:#5E8FD8; --fi:#E2BE5C; --po:#5FC0CF; --chip:#163156; --danger:#FF8A80; --ok:#6FD39A;
+  --head-bg:#0A2448; --head-fg:#FFFFFF; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px}
+.wrap{max-width:1400px;margin:0 auto;padding-inline:16px;padding-block:0 32px}
+header.top{background:var(--head-bg);color:var(--head-fg);position:relative;overflow:hidden}
+header.top .in{max-width:1400px;margin:0 auto;padding:18px 16px 34px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+.brand small{display:block;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.brand h1{margin:4px 0 0;font-family:var(--f-display);font-size:clamp(22px,3vw,34px);letter-spacing:.01em;text-wrap:balance}
+.clock{text-align:right;font-variant-numeric:tabular-nums}
+.clock b{display:block;font-family:var(--f-display);font-size:clamp(22px,2.6vw,32px)}
+.clock span{font-size:13px;opacity:.8}
+.wave{position:absolute;left:0;right:0;bottom:-1px;width:100%;height:26px;display:block}
+.wave path.a{fill:var(--gold);opacity:.9}
+.wave path.b{fill:var(--bg)}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:18px 0 14px}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:3px}
+.seg button{border:0;background:none;color:var(--muted);font:700 13px var(--f-body);padding:7px 12px;border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--navy);color:#fff}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{background:var(--blue)}
+.ghost{border:1px solid var(--line);background:var(--surface);color:var(--fg);font:700 13px var(--f-body);padding:9px 14px;border-radius:8px;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.status{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--muted)}
+.dot.live{background:var(--ok);box-shadow:0 0 0 4px color-mix(in srgb,var(--ok) 25%,transparent)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.kpi .lab{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:8px}
+.sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+.kpi .val{font-family:var(--f-display);font-size:clamp(30px,3.6vw,48px);line-height:1;font-variant-numeric:tabular-nums}
+.kpi .sub{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.kpi.hero{background:var(--navy);border-color:var(--navy);color:#fff}
+.kpi.hero .lab,.kpi.hero .sub{color:#C9D6EC}
+:root[data-theme="dark"] .kpi.hero{background:var(--blue);border-color:var(--blue)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .kpi.hero{background:var(--blue);border-color:var(--blue)}}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px;margin-top:12px}
+body.monitor .grid2{grid-template-columns:minmax(0,1fr)}
+body.monitor #formCard{display:none}
+@media (max-width:900px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;min-width:0}
+.card h2{margin:0 0 12px;font-family:var(--f-display);font-size:16px;letter-spacing:.02em;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.card h2 span{font-family:var(--f-body);font-size:12px;font-weight:400;color:var(--muted)}
+.legend{display:flex;gap:16px;font-size:13px;color:var(--muted);margin-bottom:6px}
+.legend i{display:inline-flex;align-items:center;gap:6px;font-style:normal}
+.chartbox{overflow-x:auto}
+svg.chart{display:block;width:100%;height:auto;min-width:520px}
+svg.chart text{fill:var(--muted);font:11px var(--f-body)}
+svg.chart .grid{stroke:var(--line);stroke-width:1}
+.empty{padding:28px 8px;text-align:center;color:var(--muted);line-height:1.5}
+.empty b{display:block;color:var(--fg);font-size:16px;margin-bottom:4px}
+form{display:flex;flex-direction:column;gap:12px}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+input[type=date],input[type=number]{font:700 18px var(--f-body);padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);width:100%;font-variant-numeric:tabular-nums}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opts{display:flex;gap:6px}
+.opts input{position:absolute;opacity:0;pointer-events:none}
+.opts label{flex:1;text-align:center;padding:10px 6px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);font:700 15px var(--f-body);cursor:pointer;text-transform:none;letter-spacing:0}
+.opts input:checked+label{background:var(--navy);border-color:var(--navy);color:#fff}
+.opts input:focus-visible+label{outline:3px solid var(--gold);outline-offset:2px}
+.primary{background:var(--gold);color:#0C2E5C;border:0;border-radius:8px;padding:13px;font:900 15px var(--f-display);letter-spacing:.03em;cursor:pointer}
+.primary:disabled{opacity:.5;cursor:not-allowed}
+.msg{font-size:13px;min-height:18px}
+.msg.err{color:var(--danger)} .msg.ok{color:var(--ok)}
+.note{font-size:12px;color:var(--muted);line-height:1.45}
+.tablebox{overflow-x:auto;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;min-width:640px}
+th{text-align:left;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:8px 10px;border-bottom:2px solid var(--line)}
+td{padding:10px;border-bottom:1px solid var(--line);font-size:15px}
+td.n,th.n{text-align:right}
+tr.daytot td{background:var(--chip);font-weight:700}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;background:var(--chip);color:var(--fg)}
+.pill.A{background:var(--navy);color:#fff} .pill.B{background:var(--gold);color:#0C2E5C}
+.rowact{display:flex;gap:6px;justify-content:flex-end}
+.rowact button{border:1px solid var(--line);background:none;color:var(--fg);border-radius:6px;padding:4px 9px;font:12px var(--f-body);cursor:pointer}
+.rowact button.del{color:var(--danger)}
+body.monitor .rowact,body.monitor th.act{display:none}
+body.monitor .kpi .val{font-size:clamp(40px,4.6vw,64px)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.tools .ghost{padding:7px 12px}
+#imp{display:none}
+td.ok{color:var(--ok);font-weight:700}
+td.low{color:var(--danger);font-weight:700}
+.legend{flex-wrap:wrap}
+</style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+<body>
 
-    <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md">
-        <h1 class="text-2xl font-bold text-center text-gray-800 mb-2">⚙️ Registro de Piezas</h1>
-        <p class="text-sm text-center text-gray-500 mb-6">Los datos se guardarán directamente en la base de datos de la empresa.</p>
 
-        <!-- IMPORTANTE: Aquí pegarás el enlace de envío de tu Google Form -->
-        <form id="formPiezas" action="AQUÍ_VA_TU_ENLACE_DE_GOOGLE_FORMS" method="POST" class="space-y-4">
-            
-            <!-- Selector de Cliente -->
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Cliente</label>
-                <select name="AQUÍ_ID_CLIENTE" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                    <option value="">-- Selecciona un Cliente --</option>
-                    <option value="Cliente Alfa S.A.">Cliente Alfa S.A.</option>
-                    <option value="Industrias Beta">Industrias Beta</option>
-                    <option value="Corporación Gamma">Corporación Gamma</option>
-                </select>
-            </div>
+<header class="top">
+  <div class="in">
+    <div class="brand"><small>Invermar · Operaciones</small><h1>Producción Planta Llau Llao</h1></div>
+    <div class="clock"><b id="clk">02:29</b><span id="clkd">lun 9 nov 2026</span></div>
+  </div>
+  <svg class="wave" viewBox="0 0 1440 26" preserveAspectRatio="none" aria-hidden="true">
+    <path class="a" d="M0 12 C240 0 480 24 720 12 C960 0 1200 24 1440 10 L1440 26 L0 26Z"></path>
+    <path class="b" d="M0 18 C240 6 480 30 720 18 C960 6 1200 30 1440 16 L1440 26 L0 26Z"></path>
+  </svg>
+</header>
 
-            <!-- Selector de Pieza -->
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Tipo de Pieza</label>
-                <select name="AQUÍ_ID_PIEZA" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                    <option value="">-- Selecciona el tipo --</option>
-                    <option value="Eje Central de 10mm">Eje Central de 10mm</option>
-                    <option value="Engranaje de Bronce">Engranaje de Bronce</option>
-                    <option value="Placa de Soporte">Placa de Soporte</option>
-                </select>
-            </div>
-
-            <!-- Cantidad de Piezas -->
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Cantidad Producida</label>
-                <input type="number" name="AQUÍ_ID_CANTIDAD" min="1" value="1" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            </div>
-
-            <!-- Nombre del Operario -->
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Operario de Turno</label>
-                <input type="text" name="AQUÍ_ID_OPERARIO" placeholder="Nombre completo" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            </div>
-
-            <!-- Botón Grande de Envío -->
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold p-4 rounded-xl shadow-lg transition duration-200 text-lg cursor-pointer">
-                💾 Registrar Producción
-            </button>
-        </form>
+<main class="wrap">
+  <div class="bar">
+    <div class="seg" role="group" aria-label="Período del acumulado">
+      <button type="button" data-p="hoy" aria-pressed="false">Hoy</button>
+      <button type="button" data-p="semana" aria-pressed="true">7 días</button>
+      <button type="button" data-p="mes" aria-pressed="false">Mes</button>
+      <button type="button" data-p="todo" aria-pressed="false">Temporada</button>
     </div>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <div class="status"><span class="dot live" id="dot"></span><span id="stat">54 registros en este equipo · 02:27</span></div>
+      <div class="tools"><button type="button" class="ghost" id="csvBtn">Exportar Excel (CSV)</button><button type="button" class="ghost" id="bakBtn">Respaldo</button><button type="button" class="ghost" id="impBtn">Restaurar</button><input type="file" id="imp" accept=".json,application/json"><button type="button" class="ghost" id="monBtn" aria-pressed="false">Modo monitor</button></div>
+    </div>
+  </div>
 
-</body>
-</html>
+  <section class="kpis" aria-label="Acumulado">
+    <div class="kpi hero"><div class="lab"><span class="sw" style="background:var(--gold)"></span>Evisceradas · <span id="perLab">7 días</span></div><div class="val" id="kEv">214.719</div><div class="sub" id="kEvSub">piezas · 85,9 % de meta (10 turnos × 25.000)</div></div>
+    <div class="kpi"><div class="lab"><span class="sw" style="background:var(--fi)"></span>Fileteadas · acumulado</div><div class="val" id="kFi">75.441</div><div class="sub" id="kFiSub">piezas · 150,9 % de meta (10 × 5.000)</div></div>
+    <div class="kpi"><div class="lab"><span class="sw" style="background:var(--po)"></span>Porciones · acumulado</div><div class="val" id="kPo">47.200</div><div class="sub" id="kPoSub">kg · prom. 4.720 kg/turno</div></div>
+    <div class="kpi"><div class="lab">Turno A</div><div class="val" id="kA">92.819</div><div class="sub" id="kASub">evisc. · 31.153 filet. · 20.600 kg porc. · 5 turnos</div></div>
+    <div class="kpi"><div class="lab">Turno B</div><div class="val" id="kB">121.900</div><div class="sub" id="kBSub">evisc. · 44.288 filet. · 26.600 kg porc. · 5 turnos</div></div>
+  </section>
+
+  <div class="grid2">
+    <section class="card">
+      <h2>Producción por turno vs meta <span id="chartSub">10 turnos · líneas = meta por turno</span></h2>
+      <div class="legend"><i><span class="sw" style="background:var(--ev)"></span>Evisceradas</i><i><span class="sw" style="background:var(--fi)"></span>Fileteadas</i><i>Barra tenue = bajo meta</i></div>
+      <div class="chartbox" id="chart"><svg class="chart" viewBox="0 0 900 320" role="img" aria-label="Piezas evisceradas y fileteadas por turno contra meta"><line class="grid" x1="58" x2="782" y1="274" y2="274"></line><text x="50" y="278" text-anchor="end">0</text><line class="grid" x1="58" x2="782" y1="187.33333333333334" y2="187.33333333333334"></line><text x="50" y="191.33333333333334" text-anchor="end">10.000</text><line class="grid" x1="58" x2="782" y1="100.66666666666669" y2="100.66666666666669"></line><text x="50" y="104.66666666666669" text-anchor="end">20.000</text><line class="grid" x1="58" x2="782" y1="14" y2="14"></line><text x="50" y="18" text-anchor="end">30.000</text><rect x="69.2" y="83.16" width="24" height="190.84" rx="2" fill="var(--ev)" opacity="0.55"><title>mar 3 nov · turno A mañana · evisceradas 22.020 (88,1 % de meta)</title></rect><rect x="95.2" y="204.20733333333334" width="24" height="69.79266666666666" rx="2" fill="var(--fi)" opacity="1"><title>mar 3 nov · turno A mañana · fileteadas 8.053 (161,1 % de meta)</title></rect><text x="94.2" y="290" text-anchor="middle">A·M</text><text x="94.2" y="305" text-anchor="middle">3 nov</text><rect x="141.60000000000002" y="71.19999999999999" width="24" height="202.8" rx="2" fill="var(--ev)" opacity="0.55"><title>mar 3 nov · turno B noche · evisceradas 23.400 (93,6 % de meta)</title></rect><rect x="167.60000000000002" y="201.2" width="24" height="72.80000000000001" rx="2" fill="var(--fi)" opacity="1"><title>mar 3 nov · turno B noche · fileteadas 8.400 (168,0 % de meta)</title></rect><text x="166.60000000000002" y="290" text-anchor="middle">B·N</text><rect x="214" y="97.19999999999999" width="24" height="176.8" rx="2" fill="var(--ev)" opacity="0.55"><title>mié 4 nov · turno A mañana · evisceradas 20.400 (81,6 % de meta)</title></rect><rect x="240" y="209.86666666666667" width="24" height="64.13333333333333" rx="2" fill="var(--fi)" opacity="1"><title>mié 4 nov · turno A mañana · fileteadas 7.400 (148,0 % de meta)</title></rect><text x="239" y="290" text-anchor="middle">A·M</text><text x="239" y="305" text-anchor="middle">4 nov</text><rect x="286.40000000000003" y="66" width="24" height="208" rx="2" fill="var(--ev)" opacity="0.55"><title>mié 4 nov · turno B noche · evisceradas 24.000 (96,0 % de meta)</title></rect><rect x="312.40000000000003" y="189.93333333333334" width="24" height="84.06666666666666" rx="2" fill="var(--fi)" opacity="1"><title>mié 4 nov · turno B noche · fileteadas 9.700 (194,0 % de meta)</title></rect><text x="311.40000000000003" y="290" text-anchor="middle">B·N</text><rect x="358.8" y="179.53333333333333" width="24" height="94.46666666666667" rx="2" fill="var(--ev)" opacity="0.55"><title>jue 5 nov · turno A mañana · evisceradas 10.900 (43,6 % de meta)</title></rect><rect x="384.8" y="202.93333333333334" width="24" height="71.06666666666666" rx="2" fill="var(--fi)" opacity="1"><title>jue 5 nov · turno A mañana · fileteadas 8.200 (164,0 % de meta)</title></rect><text x="383.8" y="290" text-anchor="middle">A·M</text><text x="383.8" y="305" text-anchor="middle">5 nov</text><rect x="431.2" y="47.80000000000001" width="24" height="226.2" rx="2" fill="var(--ev)" opacity="1"><title>jue 5 nov · turno B noche · evisceradas 26.100 (104,4 % de meta)</title></rect><rect x="457.2" y="188.304" width="24" height="85.696" rx="2" fill="var(--fi)" opacity="1"><title>jue 5 nov · turno B noche · fileteadas 9.888 (197,8 % de meta)</title></rect><text x="456.2" y="290" text-anchor="middle">B·N</text><rect x="503.6" y="89.40866666666668" width="24" height="184.59133333333332" rx="2" fill="var(--ev)" opacity="0.55"><title>vie 6 nov · turno A mañana · evisceradas 21.299 (85,2 % de meta)</title></rect><rect x="529.6" y="209" width="24" height="65" rx="2" fill="var(--fi)" opacity="1"><title>vie 6 nov · turno A mañana · fileteadas 7.500 (150,0 % de meta)</title></rect><text x="528.6" y="290" text-anchor="middle">A·M</text><text x="528.6" y="305" text-anchor="middle">6 nov</text><rect x="576.0000000000001" y="72.93333333333334" width="24" height="201.06666666666666" rx="2" fill="var(--ev)" opacity="0.55"><title>vie 6 nov · turno B noche · evisceradas 23.200 (92,8 % de meta)</title></rect><rect x="602.0000000000001" y="196.86666666666667" width="24" height="77.13333333333333" rx="2" fill="var(--fi)" opacity="1"><title>vie 6 nov · turno B noche · fileteadas 8.900 (178,0 % de meta)</title></rect><text x="601.0000000000001" y="290" text-anchor="middle">B·N</text><rect x="648.4000000000001" y="116.26666666666665" width="24" height="157.73333333333335" rx="2" fill="var(--ev)" opacity="0.55"><title>sáb 7 nov · turno A mañana · evisceradas 18.200 (72,8 % de meta)</title></rect><rect x="674.4000000000001" y="274" width="24" height="0" rx="2" fill="var(--fi)" opacity="0.55"><title>sáb 7 nov · turno A mañana · fileteadas 0 (0,0 % de meta)</title></rect><text x="673.4000000000001" y="290" text-anchor="middle">A·M</text><text x="673.4000000000001" y="305" text-anchor="middle">7 nov</text><rect x="720.8000000000001" y="55.599999999999994" width="24" height="218.4" rx="2" fill="var(--ev)" opacity="1"><title>sáb 7 nov · turno B noche · evisceradas 25.200 (100,8 % de meta)</title></rect><rect x="746.8000000000001" y="209.86666666666667" width="24" height="64.13333333333333" rx="2" fill="var(--fi)" opacity="1"><title>sáb 7 nov · turno B noche · fileteadas 7.400 (148,0 % de meta)</title></rect><text x="745.8000000000001" y="290" text-anchor="middle">B·N</text><line x1="58" x2="782" y1="57.333333333333314" y2="57.333333333333314" stroke="var(--ev)" stroke-width="2.5" stroke-dasharray="8 5"></line><text x="790" y="54.333333333333314" style="fill:var(--ev);font-weight:700">Meta evisc.</text><text x="790" y="68.33333333333331" style="fill:var(--ev)">25.000</text><line x1="58" x2="782" y1="230.66666666666669" y2="230.66666666666669" stroke="var(--fi)" stroke-width="2.5" stroke-dasharray="8 5"></line><text x="790" y="227.66666666666669" style="fill:var(--fi);font-weight:700">Meta filete</text><text x="790" y="241.66666666666669" style="fill:var(--fi)">5.000</text></svg></div>
+    </section>
+
+    <section class="card" id="formCard">
+      <h2>Registrar turno <span>se guarda en este equipo</span></h2>
+      <form id="frm" novalidate="">
+        <label class="f" for="fFecha">Fecha de producción<input type="date" id="fFecha" required=""></label>
+        <div class="pair">
+          <div class="f" style="display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Turno
+            <div class="opts"><input type="radio" name="turno" id="tA" value="A" checked=""><label for="tA">A</label><input type="radio" name="turno" id="tB" value="B"><label for="tB">B</label></div>
+          </div>
+          <div class="f" style="display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Horario
+            <div class="opts"><input type="radio" name="horario" id="hM" value="Mañana" checked=""><label for="hM">Mañana</label><input type="radio" name="horario" id="hN" value="Noche"><label for="hN">Noche</label></div>
+          </div>
+        </div>
+        <label class="f" for="fEv">Piezas evisceradas<input type="number" id="fEv" min="0" step="1" inputmode="numeric" placeholder="0"></label>
+        <label class="f" for="fFi">Piezas fileteadas<input type="number" id="fFi" min="0" step="1" inputmode="numeric" placeholder="0"></label>
+        <label class="f" for="fPo">Porciones realizadas (kg)<input type="number" id="fPo" min="0" step="0.1" inputmode="decimal" placeholder="0"></label>
+        <button class="primary" id="save" type="submit">Guardar registro</button>
+        <div class="msg" id="msg" role="status"></div>
+        <p class="note">Una combinación de fecha + turno + horario es un solo registro: si la ingresas de nuevo, se reemplaza la cifra anterior.</p>
+      </form>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:12px">
+    <h2>Registro por turno <span id="tblSub">10 registros</span></h2>
+    <div class="tablebox" id="tbl"><table><thead><tr><th>Fecha</th><th>Turno</th><th>Horario</th><th class="n">Evisceradas</th><th class="n">Fileteadas</th><th class="n">Porciones (kg)</th><th class="n">% fileteado</th><th class="act"></th></tr></thead><tbody><tr><td>sáb 7 nov</td><td><span class="pill A">Turno A</span></td><td>Mañana</td><td class="n low">18.200</td><td class="n low">0</td><td class="n">0</td><td class="n">0,0 %</td><td class="act"><div class="rowact"><button type="button" data-ed="2026-11-07_A_M">Editar</button><button type="button" class="del" data-del="2026-11-07_A_M">Borrar</button></div></td></tr><tr><td>sáb 7 nov</td><td><span class="pill B">Turno B</span></td><td>Noche</td><td class="n ok">25.200</td><td class="n ok">7.400</td><td class="n">1.200</td><td class="n">29,4 %</td><td class="act"><div class="rowact"><button type="button" data-ed="2026-11-07_B_N">Editar</button><button type="button" class="del" data-del="2026-11-07_B_N">Borrar</button></div></td></tr><tr class="daytot"><td colspan="3">Total sáb 7 nov</td><td class="n">43.400</td><td class="n">7.400</td><td class="n">1.200</td><td class="n">17,1 %</td><td class="act"></td></tr><tr><td>vie 6 nov</td><td><span class="pill A">Turno A</span></td><td>Mañana</td><td class="n low">21.299</td><td class="n ok">7.500</td><td class="n">5.500</td><td class="n">35,2 %</td><td class="act"><div class="rowact"><button type="button" data-ed="2026-11-06_A_M">Editar</button><button type="button" class="del" data-del="2026-11-06_A_M">Borrar</button></div></td></tr><tr><td>vie 6 nov</td><td><span class="pill B">Turno B</span></td><td>Noche</td><td class="n low">23.200</td><td class="n ok">8.900</td><td class="n">7.400</td><td class="n">38,4 %</td><td class="act"><div class="rowact"><button type="button" data-ed="2026-11-06_B_N">Editar</button><button type="button" class="del" data-del="2026-11-06_B_N">Borrar</button></div></td></tr><tr class="daytot"><td colspan="3">Total vie 6 nov</td><td class="n">44.499</td><td class="n">16.400</td><td class="n">12.900</td><td class="n">36,9 %</td><td class="act"></td></tr><tr><td>jue 5 nov</td><td><span class="pill A">Turno A</span></td><td>Mañana</td><td class="n low">10.900</td><td class="n ok">8.200</td><td class="n">3.500</td><td class="n">75,2 %</td><td class="act"><div class="rowact"><button type="button" data-ed="2026-11-05_A_M">Editar</button><button type="button" class="del" data-del="2026-11-05_A_M">Borrar</button></div></td></tr><tr><td>jue 5 nov</td><td><span class="pill B">Turno B</span></td><td>Noche</td><td class="n ok">26.100</td><td class="n ok">9.888</td><td class="n">9.900</td><td class="n">37,9 %</td><td class="act"><div class="rowact"><button type="button" data-ed="2026-11-05_B_N">Editar</button><button type="button" class="del" data-del="2026-11-05_B_N">Borrar</button></div></td></tr><tr class="daytot"><td colspan="3">Total jue 5 nov</td><td class="n">37.000</td><td class="n">18.088</td><td class="n">13.400</td><td class="n">48,9 %</td><td class="act"></td></tr><tr><td>mié 4 nov</td><td><span class="pill A">Turno A</span></td><td>Mañana</td><td class="n low">20.400</td><td class="n ok">7.400</td><td class="n">5.000</td><td class="n">36,3 %</td><td class="act"><div class="rowact"><button type="button" data-ed="2026-11-04_A_M">Editar</button><button type="button" class="del" data-del="2026-11-04_A_M">Borrar</button></div></td></tr><tr><td>mié 4 nov</td><td><span class="pill B">Turno B</span></td><td>Noche</td><td class="n low">24.000</td><td class="n ok">9.700</td><td class="n">3.400</td><td class="n">40,4 %</td><td class="act"><div class="rowact"><button type="button" data-ed="2026-11-04_B_N">Editar</button><button type="button" class="del" data-del="2026-11-04_B_N">Borrar</button></div></td></tr><tr class="daytot"><td colspan="3">Total mié 4 nov</td><td class="n">44.400</td><td class="n">17.100</td><td class="n">8.400</td><td class="n">38,5 %</td><td class="act"></td></tr><tr><td>mar 3 nov</td><td><span class="pill A">Turno A</span></td><td>Mañana</td><td class="n low">22.020</td><td class="n ok">8.053</td><td class="n">6.600</td><td class="n">36,6 %</td><td class="act"><div class="rowact"><button type="button" data-ed="2026-11-03_A_M">Editar</button><button type="button" class="del" data-del="2026-11-03_A_M">Borrar</button></div></td></tr><tr><td>mar 3 nov</td><td><span class="pill B">Turno B</span></td><td>Noche</td><td class="n low">23.400</td><td class="n ok">8.400</td><td class="n">4.700</td><td class="n">35,9 %</td><td class="act"><div class="rowact"><button type="button" data-ed="2026-11-03_B_N">Editar</button><button type="button" class="del" data-del="2026-11-03_B_N">Borrar</button></div></td></tr><tr class="daytot"><td colspan="3">Total mar 3 nov</td><td class="n">45.420</td><td class="n">16.453</td><td class="n">11.300</td><td class="n">36,2 %</td><td class="act"></td></tr></tbody></table></div>
+  </section>
+</main>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const fmt=n=>Math.round(n||0).toLocaleString('es-CL');
+  const pct=(a,b)=>b>0?(a/b*100).toFixed(1).replace('.',',')+' %':'–';
+  const pad=n=>String(n).padStart(2,'0');
+  const isoLocal=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  const DIAS=['dom','lun','mar','mié','jue','vie','sáb'];
+  const MESES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const fDate=s=>{const [y,m,d]=s.split('-').map(Number);const dt=new Date(y,m-1,d);return DIAS[dt.getDay()]+' '+d+' '+MESES[m-1];};
+
+  let rows=[], period='mes';
+  const KEY='invermar_llaullao_produccion_v1';
+  function load(){try{const o=JSON.parse(localStorage.getItem(KEY)||'{}');rows=Object.keys(o).map(k=>Object.assign({_id:k},o[k])).filter(r=>r.fecha);}catch(e){rows=[];}}
+  function persist(){const o={};rows.forEach(r=>{const c=Object.assign({},r);delete c._id;o[r._id]=c;});localStorage.setItem(KEY,JSON.stringify(o));}
+  function stamp(){const t=new Date();$('stat').textContent=rows.length+' registros en este equipo · '+pad(t.getHours())+':'+pad(t.getMinutes());$('dot').classList.add('live');}
+  function dl(name,text,type){const b=new Blob([text],{type});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}
+  try{const p=localStorage.getItem('llp');if(p)period=p;}catch(e){}
+  try{if(localStorage.getItem('llm')==='1')setMonitor(true);}catch(e){}
+
+  function tick(){const d=new Date();$('clk').textContent=pad(d.getHours())+':'+pad(d.getMinutes());$('clkd').textContent=DIAS[d.getDay()]+' '+d.getDate()+' '+MESES[d.getMonth()]+' '+d.getFullYear();}
+  tick();setInterval(tick,15000);
+  $('fFecha').value=isoLocal(new Date());
+
+  function setMonitor(on){document.body.classList.toggle('monitor',on);$('monBtn').setAttribute('aria-pressed',on);$('monBtn').textContent=on?'Salir de modo monitor':'Modo monitor';}
+  $('monBtn').addEventListener('click',()=>{const on=!document.body.classList.contains('monitor');setMonitor(on);try{localStorage.setItem('llm',on?'1':'0')}catch(e){}});
+
+  document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{period=b.dataset.p;try{localStorage.setItem('llp',period)}catch(e){}render();}));
+
+  function inPeriod(f){
+    const today=isoLocal(new Date());
+    if(period==='hoy')return f===today;
+    if(period==='semana'){const d=new Date();d.setDate(d.getDate()-6);return f>=isoLocal(d)&&f<=today;}
+    if(period==='mes')return f.slice(0,7)===today.slice(0,7);
+    return true;
+  }
+  const PLAB={hoy:'hoy',semana:'7 días',mes:'mes',todo:'temporada'};
+
+  function render(){
+    document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.p===period));
+    const sel=rows.filter(r=>inPeriod(r.fecha));
+    const sum=(arr,k)=>arr.reduce((s,r)=>s+(Number(r[k])||0),0);
+    const ev=sum(sel,'evisceradas'),fi=sum(sel,'fileteadas');
+    const days=new Set(sel.map(r=>r.fecha)).size;
+    $('perLab').textContent=PLAB[period];
+    $('kEv').textContent=fmt(ev);
+    const nT=sel.length;
+    $('kEvSub').textContent=nT?`piezas · ${pct(ev,nT*META_EV)} de meta (${nT} turno${nT>1?'s':''} × ${fmt(META_EV)})`:'piezas';
+    $('kFi').textContent=fmt(fi);
+    $('kFiSub').textContent=nT?`piezas · ${pct(fi,nT*META_FI)} de meta (${nT} × ${fmt(META_FI)})`:'piezas';
+    const po=sum(sel,'porciones');
+    $('kPo').textContent=fmt(po);
+    $('kPoSub').textContent=nT?`kg · prom. ${fmt(po/nT)} kg/turno`:'kg';
+    ['A','B'].forEach(t=>{const s=sel.filter(r=>r.turno===t);$('k'+t).textContent=fmt(sum(s,'evisceradas'));$('k'+t+'Sub').textContent=`evisc. · ${fmt(sum(s,'fileteadas'))} filet. · ${fmt(sum(s,'porciones'))} kg porc. · ${s.length} turno${s.length===1?'':'s'}`;});
+    renderChart(sel);renderTable(sel);
+  }
+
+  const META_EV=25000, META_FI=5000;
+  function renderChart(sel){
+    const o={'Mañana':0,'Noche':1};
+    let recs=[...sel].sort((a,b)=>a.fecha.localeCompare(b.fecha)||o[a.horario]-o[b.horario]||a.turno.localeCompare(b.turno));
+    if(recs.length>40)recs=recs.slice(-40);
+    $('chartSub').textContent=recs.length?`${recs.length} turno${recs.length>1?'s':''} · líneas = meta por turno`:'';
+    if(!recs.length){$('chart').innerHTML='<div class="empty"><b>Sin producción registrada en este período</b>Ingresa el primer turno en el formulario y el gráfico se actualiza al instante.</div>';return;}
+    const W=900,H=320,L=58,R=118,T=14,B=46,iw=W-L-R,ih=H-T-B;
+    const max=Math.max(META_EV*1.08,...recs.map(r=>Math.max(Number(r.evisceradas)||0,Number(r.fileteadas)||0)));
+    const mag=Math.pow(10,Math.floor(Math.log10(max)));const stepC=[1,2,2.5,5,10].map(s=>s*mag).find(s=>max/s<=6)||mag*10;
+    const top=Math.ceil(max/stepC)*stepC;const y=v=>T+ih-(v/top)*ih;
+    const g=iw/recs.length,bw=Math.min(24,g*0.36);
+    let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Piezas evisceradas y fileteadas por turno contra meta">`;
+    for(let v=0;v<=top+1e-9;v+=stepC){s+=`<line class="grid" x1="${L}" x2="${L+iw}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end">${fmt(v)}</text>`;}
+    const every=Math.ceil(recs.length/14);let lastF=null;
+    recs.forEach((r,i)=>{const cx=L+g*i+g/2,ev=Number(r.evisceradas)||0,fi=Number(r.fileteadas)||0;
+      const lab=`${fDate(r.fecha)} · turno ${r.turno} ${r.horario.toLowerCase()}`;
+      s+=`<rect x="${cx-bw-1}" y="${y(ev)}" width="${bw}" height="${Math.max(0,T+ih-y(ev))}" rx="2" fill="var(--ev)" opacity="${ev>=META_EV?1:.55}"><title>${lab} · evisceradas ${fmt(ev)} (${pct(ev,META_EV)} de meta)</title></rect>`;
+      s+=`<rect x="${cx+1}" y="${y(fi)}" width="${bw}" height="${Math.max(0,T+ih-y(fi))}" rx="2" fill="var(--fi)" opacity="${fi>=META_FI?1:.55}"><title>${lab} · fileteadas ${fmt(fi)} (${pct(fi,META_FI)} de meta)</title></rect>`;
+      if(i%every===0||i===recs.length-1){const [yy,mm,dd]=r.fecha.split('-');
+        s+=`<text x="${cx}" y="${H-B+16}" text-anchor="middle">${r.turno}·${r.horario==='Noche'?'N':'M'}</text>`;
+        if(r.fecha!==lastF)s+=`<text x="${cx}" y="${H-B+31}" text-anchor="middle">${Number(dd)} ${MESES[Number(mm)-1]}</text>`;}
+      lastF=r.fecha;
+    });
+    [[META_EV,'var(--ev)','Meta evisc.'],[META_FI,'var(--fi)','Meta filete']].forEach(([v,c,t])=>{
+      s+=`<line x1="${L}" x2="${L+iw}" y1="${y(v)}" y2="${y(v)}" stroke="${c}" stroke-width="2.5" stroke-dasharray="8 5"/>`;
+      s+=`<text x="${L+iw+8}" y="${y(v)-3}" style="fill:${c};font-weight:700">${t}</text><text x="${L+iw+8}" y="${y(v)+11}" style="fill:${c}">${fmt(v)}</text>`;
+    });
+    s+='</svg>';$('chart').innerHTML=s;
+  }
+
+  function renderTable(sel){
+    if(!sel.length){$('tblSub').textContent='';$('tbl').innerHTML='<div class="empty"><b>Aún no hay turnos en este período</b>Cada registro guardado aparece aquí, agrupado por día con su subtotal.</div>';return;}
+    const order={'Mañana':0,'Noche':1};
+    const sorted=[...sel].sort((a,b)=>b.fecha.localeCompare(a.fecha)||a.turno.localeCompare(b.turno)||order[a.horario]-order[b.horario]);
+    $('tblSub').textContent=`${sorted.length} registro${sorted.length>1?'s':''}`;
+    let h='<table><thead><tr><th>Fecha</th><th>Turno</th><th>Horario</th><th class="n">Evisceradas</th><th class="n">Fileteadas</th><th class="n">Porciones (kg)</th><th class="n">% fileteado</th><th class="act"></th></tr></thead><tbody>';
+    let cur=null,acc=null;
+    const flush=()=>{if(cur)h+=`<tr class="daytot"><td colspan="3">Total ${fDate(cur)}</td><td class="n">${fmt(acc.ev)}</td><td class="n">${fmt(acc.fi)}</td><td class="n">${fmt(acc.po)}</td><td class="n">${pct(acc.fi,acc.ev)}</td><td class="act"></td></tr>`;};
+    sorted.forEach(r=>{
+      if(r.fecha!==cur){flush();cur=r.fecha;acc={ev:0,fi:0,po:0};}
+      acc.ev+=Number(r.evisceradas)||0;acc.fi+=Number(r.fileteadas)||0;acc.po+=Number(r.porciones)||0;
+      h+=`<tr><td>${fDate(r.fecha)}</td><td><span class="pill ${r.turno==='A'?'A':'B'}">Turno ${r.turno==='A'?'A':'B'}</span></td><td>${r.horario==='Noche'?'Noche':'Mañana'}</td><td class="n ${r.evisceradas>=META_EV?'ok':'low'}">${fmt(r.evisceradas)}</td><td class="n ${r.fileteadas>=META_FI?'ok':'low'}">${fmt(r.fileteadas)}</td><td class="n">${fmt(r.porciones)}</td><td class="n">${pct(r.fileteadas,r.evisceradas)}</td><td class="act">${`<div class="rowact"><button type="button" data-ed="${r._id}">Editar</button><button type="button" class="del" data-del="${r._id}">Borrar</button></div>`}</td></tr>`;
+    });
+    flush();h+='</tbody></table>';$('tbl').innerHTML=h;
+  }
+
+  $('tbl').addEventListener('click',async e=>{
+    const ed=e.target.closest('[data-ed]'),del=e.target.closest('[data-del]');
+    if(ed){const r=rows.find(x=>x._id===ed.dataset.ed);if(!r)return;$('fFecha').value=r.fecha;$(r.turno==='B'?'tB':'tA').checked=true;$(r.horario==='Noche'?'hN':'hM').checked=true;$('fEv').value=r.evisceradas;$('fFi').value=r.fileteadas;$('fPo').value=(r.porciones??'');if(document.body.classList.contains('monitor'))setMonitor(false);$('fEv').focus();msg('Editando el registro: corrige y guarda.','');}
+    if(del){
+      if(del.dataset.confirm!=='1'){del.dataset.confirm='1';del.textContent='¿Confirmar?';setTimeout(()=>{if(del.isConnected){del.dataset.confirm='';del.textContent='Borrar';}},4000);return;}
+      del.disabled=true;
+      const prev=rows;rows=rows.filter(r=>r._id!==del.dataset.del);try{persist();msg('Registro borrado.','ok');render();stamp();}catch(err){rows=prev;del.disabled=false;msg('No se pudo borrar en este navegador.','err');}
+    }
+  });
+
+  function msg(t,c){const m=$('msg');m.textContent=t;m.className='msg '+(c||'');}
+
+  $('frm').addEventListener('submit',async e=>{
+    e.preventDefault();
+    const fecha=$('fFecha').value,turno=document.querySelector('input[name=turno]:checked').value,horario=document.querySelector('input[name=horario]:checked').value;
+    const ev=$('fEv').value.trim(),fi=$('fFi').value.trim(),po=$('fPo').value.trim().replace(',','.');
+    if(!fecha)return msg('Ingresa la fecha de producción.','err');
+    if(ev===''&&fi===''&&po==='')return msg('Ingresa al menos un valor: evisceradas, fileteadas o kg de porciones.','err');
+    const nEv=ev===''?0:Number(ev),nFi=fi===''?0:Number(fi);
+    if(!Number.isInteger(nEv)||!Number.isInteger(nFi)||nEv<0||nFi<0)return msg('Las piezas deben ser números enteros, sin decimales ni negativos.','err');
+    const nPo=po===''?0:Math.round(Number(po)*10)/10;
+    if(!isFinite(nPo)||nPo<0)return msg('Los kg de porciones deben ser un número positivo.','err');
+    const id=`${fecha}_${turno}_${horario==='Noche'?'N':'M'}`;
+    const existed=rows.some(r=>r._id===id);
+    $('save').disabled=true;
+    try{
+      const prev=rows;rows=rows.filter(r=>r._id!==id).concat([{_id:id,fecha,turno,horario,evisceradas:nEv,fileteadas:nFi,porciones:nPo,actualizado:new Date().toISOString()}]);
+      try{persist();}catch(pe){rows=prev;throw pe;}
+      render();stamp();
+      msg(existed?`Actualizado: turno ${turno} ${horario.toLowerCase()} del ${fDate(fecha)}.`:`Guardado: turno ${turno} ${horario.toLowerCase()} del ${fDate(fecha)}.`,'ok');
+      $('fEv').value='';$('fFi').value='';$('fPo').value='';
+    }catch(err){
+      msg('No se pudo guardar: el navegador bloquea el almacenamiento local. Revisa que no esté en modo incógnito.','err');
+    }finally{$('save').disabled=false;}
+  });
+
+  render();
+
+  load();render();stamp();
+  window.addEventListener('storage',ev=>{if(ev.key===KEY){load();render();stamp();}});
+  setInterval(()=>render(),60000);
+  $('csvBtn').addEventListener('click',()=>{
+    const o={'Mañana':0,'Noche':1};
+    const s=[...rows].sort((a,b)=>a.fecha.localeCompare(b.fecha)||a.turno.localeCompare(b.turno)||o[a.horario]-o[b.horario]);
+    const lines=['Fecha;Turno;Horario;Piezas evisceradas;Piezas fileteadas;Porciones (kg);% fileteado'];
+    s.forEach(r=>lines.push([r.fecha,r.turno,r.horario,r.evisceradas,r.fileteadas,String(Number(r.porciones)||0).replace('.',','),r.evisceradas>0?(r.fileteadas/r.evisceradas*100).toFixed(1).replace('.',','):''].join(';')));
+    dl('Produccion_LlauLlao_'+isoLocal(new Date())+'.csv','\ufeff'+lines.join('\r\n'),'text/csv;charset=utf-8');
+  });
+  $('bakBtn').addEventListener('click',()=>{dl('Respaldo_Produccion_LlauLlao_'+isoLocal(new Date())+'.json',localStorage.getItem(KEY)||'{}','application/json');msg('Respaldo descargado. Guárdalo en una carpeta compartida.','ok');});
+  $('impBtn').addEventListener('click',()=>$('imp').click());
+  $('imp').addEventListener('change',async()=>{
+    const f=$('imp').files[0];if(!f)return;
+    try{const o=JSON.parse(await f.text());if(typeof o!=='object'||Array.isArray(o))throw 0;
+      const cur=JSON.parse(localStorage.getItem(KEY)||'{}');let n=0;
+      Object.keys(o).forEach(k=>{const r=o[k];if(r&&r.fecha&&/^\d{4}-\d{2}-\d{2}_[AB]_[MN]$/.test(k)){cur[k]=r;n++;}});
+      localStorage.setItem(KEY,JSON.stringify(cur));load();render();stamp();msg(n+' registros restaurados desde el respaldo.','ok');
+    }catch(e){msg('El archivo no es un respaldo válido de este tablero.','err');}
+    $('imp').value='';
+  });
+})();
+</script>
+
+
+
+</body></html>
