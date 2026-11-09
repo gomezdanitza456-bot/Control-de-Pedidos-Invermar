@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Producción Planta Llau Llao</title>
+<title>Control De Pedidos Planta Llau Llao</title>
 <style>
 /* Layout: franja navy con ola de marca, KPIs del acumulado arriba, gráfico diario + formulario lado a lado, registro completo abajo. */
 :root{
@@ -112,7 +112,7 @@ td.low{color:var(--danger);font-weight:700}
 
 <header class="top">
   <div class="in">
-    <div class="brand"><small>Invermar · Operaciones</small><h1>Producción Planta Llau Llao</h1></div>
+    <div class="brand"><small>Invermar · Pedidos</small><h1>Control De Pedidos Planta Llau Llao</h1></div>
     <div class="clock"><b id="clk">--:--</b><span id="clkd"></span></div>
   </div>
   <svg class="wave" viewBox="0 0 1440 26" preserveAspectRatio="none" aria-hidden="true">
@@ -127,7 +127,7 @@ td.low{color:var(--danger);font-weight:700}
       <button type="button" data-p="hoy" aria-pressed="false">Hoy</button>
       <button type="button" data-p="semana" aria-pressed="false">7 días</button>
       <button type="button" data-p="mes" aria-pressed="true">Mes</button>
-      <button type="button" data-p="todo" aria-pressed="false">Temporada</button>
+     
     </div>
     <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
       <div class="status"><span class="dot" id="dot"></span><span id="stat">Conectando…</span></div>
@@ -136,7 +136,7 @@ td.low{color:var(--danger);font-weight:700}
   </div>
 
   <section class="kpis" aria-label="Acumulado">
-    <div class="kpi hero"><div class="lab"><span class="sw" style="background:var(--gold)"></span>Evisceradas · <span id="perLab">mes</span></div><div class="val" id="kEv">0</div><div class="sub" id="kEvSub">piezas</div></div>
+    <div class="kpi hero"><div class="lab"><span class="sw" style="background:var(--gold)"></span>Filetes S/V · <span id="perLab">mes</span></div><div class="val" id="kEv">0</div><div class="sub" id="kEvSub">piezas</div></div>
     <div class="kpi"><div class="lab"><span class="sw" style="background:var(--fi)"></span>Fileteadas · acumulado</div><div class="val" id="kFi">0</div><div class="sub" id="kFiSub">piezas</div></div>
     <div class="kpi"><div class="lab"><span class="sw" style="background:var(--po)"></span>Porciones · acumulado</div><div class="val" id="kPo">0</div><div class="sub" id="kPoSub">kg</div></div>
     <div class="kpi"><div class="lab">Turno A</div><div class="val" id="kA">0</div><div class="sub" id="kASub">evisc. · filet.</div></div>
@@ -145,7 +145,7 @@ td.low{color:var(--danger);font-weight:700}
 
   <div class="grid2">
     <section class="card">
-      <h2>Producción por turno vs meta <span id="chartSub"></span></h2>
+      <h2>Control De Pedidos por turno vs meta <span id="chartSub"></span></h2>
       <div class="legend"><i><span class="sw" style="background:var(--ev)"></span>Evisceradas</i><i><span class="sw" style="background:var(--fi)"></span>Fileteadas</i><i>Barra tenue = bajo meta</i></div>
       <div class="chartbox" id="chart"></div>
     </section>
