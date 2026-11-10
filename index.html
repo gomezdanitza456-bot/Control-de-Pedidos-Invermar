@@ -1,5 +1,4 @@
-
-   <!doctype html>
+<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -73,7 +72,7 @@ svg.chart .grid{stroke:var(--line);stroke-width:1}
 .empty b{display:block;color:var(--fg);font-size:16px;margin-bottom:4px}
 form{display:flex;flex-direction:column;gap:12px}
 label.f{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-input[type=date],input[type=number]{font:700 18px var(--f-body);padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);width:100%;font-variant-numeric:tabular-nums}
+input[type=date],input[type=text],input[type=number]{font:700 18px var(--f-body);padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);width:100%;font-variant-numeric:tabular-nums}
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .opts{display:flex;gap:6px}
 .opts input{position:absolute;opacity:0;pointer-events:none}
@@ -109,7 +108,6 @@ td.low{color:var(--danger);font-weight:700}
 </head>
 <body>
 
-
 <header class="top">
   <div class="in">
     <div class="brand"><small>Invermar · Pedidos</small><h1>Control De Pedidos Planta Llau Llao</h1></div>
@@ -127,7 +125,6 @@ td.low{color:var(--danger);font-weight:700}
       <button type="button" data-p="hoy" aria-pressed="false">Hoy</button>
       <button type="button" data-p="semana" aria-pressed="false">7 días</button>
       <button type="button" data-p="mes" aria-pressed="true">Mes</button>
-     
     </div>
     <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
       <div class="status"><span class="dot" id="dot"></span><span id="stat">Conectando…</span></div>
@@ -136,17 +133,15 @@ td.low{color:var(--danger);font-weight:700}
   </div>
 
   <section class="kpis" aria-label="Acumulado">
-    <div class="kpi hero"><div class="lab"><span class="sw" style="background:var(--gold)"></span>Filetes S/V · <span id="perLab">mes</span></div><div class="val" id="kEv">0</div><div class="sub" id="kEvSub">piezas</div></div>
-    <div class="kpi"><div class="lab"><span class="sw" style="background:var(--fi)"></span>Cliente</div><div class="val" id="kFi">..</div><div class="sub" id="kFiSub">Cliente</div></div>
-    <div class="kpi"><div class="lab"><span class="sw" style="background:var(--po)"></span>Restante</div><div class="val" id="kPo">0</div><div class="sub" id="kPoSub">kg</div></div>
-    <div class="kpi"><div class="lab">Turno A</div><div class="val" id="kA">0</div><div class="sub" id="kASub">Filetes s/v · filet.</div></div>
-    <div class="kpi"><div class="lab">Turno B</div><div class="val" id="kB">0</div><div class="sub" id="kBSub">Filetes s/v · filet.</div></div>
+    <div class="kpi hero"><div class="lab"><span class="sw" style="background:var(--gold)"></span>Piezas · <span id="perLab">mes</span></div><div class="val" id="kPiezas">0</div><div class="sub" id="kPiezasSub">piezas</div></div>
+    <div class="kpi"><div class="lab"><span class="sw" style="background:var(--fi)"></span>Cliente</div><div class="val" id="kCliente">0</div><div class="sub" id="kClienteSub">clientes únicos</div></div>
+    <div class="kpi"><div class="lab"><span class="sw" style="background:var(--po)"></span>Restante</div><div class="val" id="kRestante">0</div><div class="sub" id="kRestanteSub">kg</div></div>
   </section>
 
   <div class="grid2">
     <section class="card">
       <h2>Control De Pedidos por turno vs meta <span id="chartSub"></span></h2>
-      <div class="legend"><i><span class="sw" style="background:var(--ev)"></span>Filetes S/V</i><i><span class="sw" style="background:var(--fi)"></span>Fileteadas</i><i>Barra tenue = bajo meta</i></div>
+      <div class="legend"><i><span class="sw" style="background:var(--ev)"></span>Piezas</i><i>Barra tenue = bajo meta</i></div>
       <div class="chartbox" id="chart"></div>
     </section>
 
@@ -155,16 +150,17 @@ td.low{color:var(--danger);font-weight:700}
       <form id="frm" novalidate>
         <label class="f" for="fFecha">Fecha de producción<input type="date" id="fFecha" required></label>
         <div class="pair">
-          <div class="f" style="display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Turno
+          <div class="f">Turno
             <div class="opts"><input type="radio" name="turno" id="tA" value="A" checked><label for="tA">A</label><input type="radio" name="turno" id="tB" value="B"><label for="tB">B</label></div>
           </div>
-          <div class="f" style="display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Horario
+          <div class="f">Horario
             <div class="opts"><input type="radio" name="horario" id="hM" value="Mañana" checked><label for="hM">Mañana</label><input type="radio" name="horario" id="hN" value="Noche"><label for="hN">Noche</label></div>
           </div>
         </div>
-        <label class="f" for="fEv">Filetes S/V<input type="number" id="fEv" min="0" step="1" inputmode="numeric" placeholder="0"></label>
-        <label class="f" for="fFi">Cliente<input type="string" id="fFi" min="0" step="1" inputmode="texto" placeholder="0"></label>
-     
+        <label class="f" for="fPiezas">Piezas<input type="number" id="fPiezas" min="0" step="1" inputmode="numeric" placeholder="0"></label>
+        <label class="f" for="fCliente">Cliente<input type="text" id="fCliente" placeholder="Nombre del cliente"></label>
+        <label class="f" for="fRestante">Restante (kg)<input type="number" id="fRestante" min="0" step="0.1" inputmode="decimal" placeholder="0.0"></label>
+      
         <button class="primary" id="save" type="submit">Guardar registro</button>
         <div class="msg" id="msg" role="status"></div>
         <p class="note">Una combinación de fecha + turno + horario es un solo registro: si la ingresas de nuevo, se reemplaza la cifra anterior.</p>
@@ -191,10 +187,31 @@ td.low{color:var(--danger);font-weight:700}
 
   let rows=[], period='mes';
   const KEY='invermar_llaullao_produccion_v1';
-  function load(){try{const o=JSON.parse(localStorage.getItem(KEY)||'{}');rows=Object.keys(o).map(k=>Object.assign({_id:k},o[k])).filter(r=>r.fecha);}catch(e){rows=[];}}
+  
+  // Aseguramos que los datos antiguos sigan funcionando (Mapeo de nombres viejos a los nuevos)
+  function load(){
+    try{
+      const o=JSON.parse(localStorage.getItem(KEY)||'{}');
+      rows=Object.keys(o).map(k=>{
+        const r = o[k];
+        return {
+          _id: k,
+          fecha: r.fecha,
+          turno: r.turno,
+          horario: r.horario,
+          piezas: r.piezas ?? r.evisceradas ?? 0,
+          cliente: r.cliente ?? r.fileteadas ?? '',
+          restante: r.restante ?? r.porciones ?? 0,
+          actualizado: r.actualizado
+        };
+      }).filter(r=>r.fecha);
+    }catch(e){rows=[];}
+  }
+  
   function persist(){const o={};rows.forEach(r=>{const c=Object.assign({},r);delete c._id;o[r._id]=c;});localStorage.setItem(KEY,JSON.stringify(o));}
   function stamp(){const t=new Date();$('stat').textContent=rows.length+' registros en este equipo · '+pad(t.getHours())+':'+pad(t.getMinutes());$('dot').classList.add('live');}
   function dl(name,text,type){const b=new Blob([text],{type});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}
+  
   try{const p=localStorage.getItem('llp');if(p)period=p;}catch(e){}
   try{if(localStorage.getItem('llm')==='1')setMonitor(true);}catch(e){}
 
@@ -220,22 +237,29 @@ td.low{color:var(--danger);font-weight:700}
     document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.p===period));
     const sel=rows.filter(r=>inPeriod(r.fecha));
     const sum=(arr,k)=>arr.reduce((s,r)=>s+(Number(r[k])||0),0);
-    const ev=sum(sel,'evisceradas'),fi=sum(sel,'fileteadas');
+    
+    const piezas=sum(sel,'piezas');
+    const restante=sum(sel,'restante');
+    // Contamos clientes únicos en este periodo
+    const clientesUnicos = new Set(sel.map(r=>String(r.cliente).toUpperCase()).filter(c=>c.trim()!==''));
+    
     const days=new Set(sel.map(r=>r.fecha)).size;
-    $('perLab').textContent=PLAB[period];
-    $('kEv').textContent=fmt(ev);
     const nT=sel.length;
-    $('kEvSub').textContent=nT?`piezas · ${pct(ev,nT*META_EV)} de meta (${nT} turno${nT>1?'s':''} × ${fmt(META_EV)})`:'piezas';
-    $('kFi').textContent=fmt(fi);
-    $('kFiSub').textContent=nT?`piezas · ${pct(fi,nT*META_FI)} de meta (${nT} × ${fmt(META_FI)})`:'piezas';
-    const po=sum(sel,'porciones');
-    $('kPo').textContent=fmt(po);
-    $('kPoSub').textContent=nT?`kg · prom. ${fmt(po/nT)} kg/turno`:'kg';
-    ['A','B'].forEach(t=>{const s=sel.filter(r=>r.turno===t);$('k'+t).textContent=fmt(sum(s,'Filetes S/V'));$('k'+t+'Sub').textContent=`evisc. · ${fmt(sum(s,'Cliente'))} filet. · ${fmt(sum(s,'Kilos'))} kg porc. · ${s.length} turno${s.length===1?'':'s'}`;});
+
+    $('perLab').textContent=PLAB[period];
+    $('kPiezas').textContent=fmt(piezas);
+    $('kPiezasSub').textContent=nT?`piezas · ${pct(piezas,nT*META_EV)} de meta (${nT} turno${nT>1?'s':''} × ${fmt(META_EV)})`:'piezas';
+    
+    $('kCliente').textContent=clientesUnicos.size;
+    $('kClienteSub').textContent=clientesUnicos.size === 1 ? 'cliente único' : 'clientes únicos';
+    
+    $('kRestante').textContent=fmt(restante);
+    $('kRestanteSub').textContent=nT?`kg · prom. ${fmt(restante/nT)} kg/turno`:'kg';
+    
     renderChart(sel);renderTable(sel);
   }
 
-  const META_EV=25000, META_FI=5000;
+  const META_EV=25000;
   function renderChart(sel){
     const o={'Mañana':0,'Noche':1};
     let recs=[...sel].sort((a,b)=>a.fecha.localeCompare(b.fecha)||o[a.horario]-o[b.horario]||a.turno.localeCompare(b.turno));
@@ -243,23 +267,26 @@ td.low{color:var(--danger);font-weight:700}
     $('chartSub').textContent=recs.length?`${recs.length} turno${recs.length>1?'s':''} · líneas = meta por turno`:'';
     if(!recs.length){$('chart').innerHTML='<div class="empty"><b>Sin producción registrada en este período</b>Ingresa el primer turno en el formulario y el gráfico se actualiza al instante.</div>';return;}
     const W=900,H=320,L=58,R=118,T=14,B=46,iw=W-L-R,ih=H-T-B;
-    const max=Math.max(META_EV*1.08,...recs.map(r=>Math.max(Number(r.evisceradas)||0,Number(r.fileteadas)||0)));
+    const max=Math.max(META_EV*1.08,...recs.map(r=>Number(r.piezas)||0));
     const mag=Math.pow(10,Math.floor(Math.log10(max)));const stepC=[1,2,2.5,5,10].map(s=>s*mag).find(s=>max/s<=6)||mag*10;
     const top=Math.ceil(max/stepC)*stepC;const y=v=>T+ih-(v/top)*ih;
-    const g=iw/recs.length,bw=Math.min(24,g*0.36);
-    let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Piezas evisceradas y fileteadas por turno contra meta">`;
+    const g=iw/recs.length,bw=Math.min(32,g*0.6);
+    
+    let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Piezas por turno contra meta">`;
     for(let v=0;v<=top+1e-9;v+=stepC){s+=`<line class="grid" x1="${L}" x2="${L+iw}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end">${fmt(v)}</text>`;}
     const every=Math.ceil(recs.length/14);let lastF=null;
-    recs.forEach((r,i)=>{const cx=L+g*i+g/2,ev=Number(r.evisceradas)||0,fi=Number(r.fileteadas)||0;
+    
+    recs.forEach((r,i)=>{
+      const cx=L+g*i+g/2, piezas=Number(r.piezas)||0;
       const lab=`${fDate(r.fecha)} · turno ${r.turno} ${r.horario.toLowerCase()}`;
-      s+=`<rect x="${cx-bw-1}" y="${y(ev)}" width="${bw}" height="${Math.max(0,T+ih-y(ev))}" rx="2" fill="var(--ev)" opacity="${ev>=META_EV?1:.55}"><title>${lab} · evisceradas ${fmt(ev)} (${pct(ev,META_EV)} de meta)</title></rect>`;
-      s+=`<rect x="${cx+1}" y="${y(fi)}" width="${bw}" height="${Math.max(0,T+ih-y(fi))}" rx="2" fill="var(--fi)" opacity="${fi>=META_FI?1:.55}"><title>${lab} · fileteadas ${fmt(fi)} (${pct(fi,META_FI)} de meta)</title></rect>`;
+      s+=`<rect x="${cx-bw/2}" y="${y(piezas)}" width="${bw}" height="${Math.max(0,T+ih-y(piezas))}" rx="2" fill="var(--ev)" opacity="${piezas>=META_EV?1:.55}"><title>${lab} · piezas ${fmt(piezas)} (${pct(piezas,META_EV)} de meta)</title></rect>`;
       if(i%every===0||i===recs.length-1){const [yy,mm,dd]=r.fecha.split('-');
         s+=`<text x="${cx}" y="${H-B+16}" text-anchor="middle">${r.turno}·${r.horario==='Noche'?'N':'M'}</text>`;
         if(r.fecha!==lastF)s+=`<text x="${cx}" y="${H-B+31}" text-anchor="middle">${Number(dd)} ${MESES[Number(mm)-1]}</text>`;}
       lastF=r.fecha;
     });
-    [[META_EV,'var(--ev)','Meta evisc.'],[META_FI,'var(--fi)','Meta filete']].forEach(([v,c,t])=>{
+    
+    [[META_EV,'var(--ev)','Meta piezas']].forEach(([v,c,t])=>{
       s+=`<line x1="${L}" x2="${L+iw}" y1="${y(v)}" y2="${y(v)}" stroke="${c}" stroke-width="2.5" stroke-dasharray="8 5"/>`;
       s+=`<text x="${L+iw+8}" y="${y(v)-3}" style="fill:${c};font-weight:700">${t}</text><text x="${L+iw+8}" y="${y(v)+11}" style="fill:${c}">${fmt(v)}</text>`;
     });
@@ -271,20 +298,26 @@ td.low{color:var(--danger);font-weight:700}
     const order={'Mañana':0,'Noche':1};
     const sorted=[...sel].sort((a,b)=>b.fecha.localeCompare(a.fecha)||a.turno.localeCompare(b.turno)||order[a.horario]-order[b.horario]);
     $('tblSub').textContent=`${sorted.length} registro${sorted.length>1?'s':''}`;
-    let h='<table><thead><tr><th>Fecha</th><th>Turno</th><th>Horario</th><th class="n">Filetes S/V</th><th class="n">Cliente</th><th class="n">Restante (kg)</th><th class="n">% fileteado</th><th class="act"></th></tr></thead><tbody>';
+    let h='<table><thead><tr><th>Fecha</th><th>Turno</th><th>Horario</th><th class="n">Piezas</th><th>Cliente</th><th class="n">Restante (kg)</th><th class="act"></th></tr></thead><tbody>';
     let cur=null,acc=null;
-    const flush=()=>{if(cur)h+=`<tr class="daytot"><td colspan="3">Total ${fDate(cur)}</td><td class="n">${fmt(acc.ev)}</td><td class="n">${fmt(acc.fi)}</td><td class="n">${fmt(acc.po)}</td><td class="n">${pct(acc.fi,acc.ev)}</td><td class="act"></td></tr>`;};
+    const flush=()=>{if(cur)h+=`<tr class="daytot"><td colspan="3">Total ${fDate(cur)}</td><td class="n">${fmt(acc.piezas)}</td><td></td><td class="n">${fmt(acc.restante)}</td><td class="act"></td></tr>`;};
     sorted.forEach(r=>{
-      if(r.fecha!==cur){flush();cur=r.fecha;acc={ev:0,fi:0,po:0};}
-      acc.ev+=Number(r.evisceradas)||0;acc.fi+=Number(r.fileteadas)||0;acc.po+=Number(r.porciones)||0;
-      h+=`<tr><td>${fDate(r.fecha)}</td><td><span class="pill ${r.turno==='A'?'A':'B'}">Turno ${r.turno==='A'?'A':'B'}</span></td><td>${r.horario==='Noche'?'Noche':'Mañana'}</td><td class="n ${r.evisceradas>=META_EV?'ok':'low'}">${fmt(r.evisceradas)}</td><td class="n ${r.fileteadas>=META_FI?'ok':'low'}">${fmt(r.fileteadas)}</td><td class="n">${fmt(r.porciones)}</td><td class="n">${pct(r.fileteadas,r.evisceradas)}</td><td class="act">${`<div class="rowact"><button type="button" data-ed="${r._id}">Editar</button><button type="button" class="del" data-del="${r._id}">Borrar</button></div>`}</td></tr>`;
+      if(r.fecha!==cur){flush();cur=r.fecha;acc={piezas:0,restante:0};}
+      acc.piezas+=Number(r.piezas)||0; acc.restante+=Number(r.restante)||0;
+      h+=`<tr><td>${fDate(r.fecha)}</td><td><span class="pill ${r.turno==='A'?'A':'B'}">Turno ${r.turno==='A'?'A':'B'}</span></td><td>${r.horario==='Noche'?'Noche':'Mañana'}</td><td class="n ${r.piezas>=META_EV?'ok':'low'}">${fmt(r.piezas)}</td><td>${r.cliente}</td><td class="n">${fmt(r.restante)}</td><td class="act">${`<div class="rowact"><button type="button" data-ed="${r._id}">Editar</button><button type="button" class="del" data-del="${r._id}">Borrar</button></div>`}</td></tr>`;
     });
     flush();h+='</tbody></table>';$('tbl').innerHTML=h;
   }
 
   $('tbl').addEventListener('click',async e=>{
     const ed=e.target.closest('[data-ed]'),del=e.target.closest('[data-del]');
-    if(ed){const r=rows.find(x=>x._id===ed.dataset.ed);if(!r)return;$('fFecha').value=r.fecha;$(r.turno==='B'?'tB':'tA').checked=true;$(r.horario==='Noche'?'hN':'hM').checked=true;$('fEv').value=r.evisceradas;$('fFi').value=r.fileteadas;$('fPo').value=(r.porciones??'');if(document.body.classList.contains('monitor'))setMonitor(false);$('fEv').focus();msg('Editando el registro: corrige y guarda.','');}
+    if(ed){
+      const r=rows.find(x=>x._id===ed.dataset.ed);if(!r)return;
+      $('fFecha').value=r.fecha;$(r.turno==='B'?'tB':'tA').checked=true;$(r.horario==='Noche'?'hN':'hM').checked=true;
+      $('fPiezas').value=r.piezas;$('fCliente').value=r.cliente;$('fRestante').value=(r.restante??'');
+      if(document.body.classList.contains('monitor'))setMonitor(false);
+      $('fPiezas').focus();msg('Editando el registro: corrige y guarda.','');
+    }
     if(del){
       if(del.dataset.confirm!=='1'){del.dataset.confirm='1';del.textContent='¿Confirmar?';setTimeout(()=>{if(del.isConnected){del.dataset.confirm='';del.textContent='Borrar';}},4000);return;}
       del.disabled=true;
@@ -297,24 +330,29 @@ td.low{color:var(--danger);font-weight:700}
   $('frm').addEventListener('submit',async e=>{
     e.preventDefault();
     const fecha=$('fFecha').value,turno=document.querySelector('input[name=turno]:checked').value,horario=document.querySelector('input[name=horario]:checked').value;
-    const ev=$('fEv').value.trim(),fi=$('fFi').value.trim(),po=$('fPo').value.trim().replace(',','.');
+    const piezas=$('fPiezas').value.trim(),cliente=$('fCliente').value.trim(),restante=$('fRestante').value.trim().replace(',','.');
+    
     if(!fecha)return msg('Ingresa la fecha de producción.','err');
-    if(ev===''&&fi===''&&po==='')return msg('Ingresa al menos un valor: evisceradas, fileteadas o kg de porciones.','err');
-    const nEv=ev===''?0:Number(ev),nFi=fi===''?0:Number(fi);
-    if(!Number.isInteger(nEv)||!Number.isInteger(nFi)||nEv<0||nFi<0)return msg('Las piezas deben ser números enteros, sin decimales ni negativos.','err');
-    const nPo=po===''?0:Math.round(Number(po)*10)/10;
-    if(!isFinite(nPo)||nPo<0)return msg('Los kg de porciones deben ser un número positivo.','err');
+    if(piezas===''&&cliente===''&&restante==='')return msg('Ingresa al menos un valor.','err');
+    
+    const nPiezas=piezas===''?0:Number(piezas);
+    if(!Number.isInteger(nPiezas)||nPiezas<0)return msg('Las piezas deben ser números enteros positivos.','err');
+    
+    const nRestante=restante===''?0:Math.round(Number(restante)*10)/10;
+    if(!isFinite(nRestante)||nRestante<0)return msg('El restante debe ser un número positivo.','err');
+    
     const id=`${fecha}_${turno}_${horario==='Noche'?'N':'M'}`;
     const existed=rows.some(r=>r._id===id);
     $('save').disabled=true;
     try{
-      const prev=rows;rows=rows.filter(r=>r._id!==id).concat([{_id:id,fecha,turno,horario,evisceradas:nEv,fileteadas:nFi,porciones:nPo,actualizado:new Date().toISOString()}]);
+      const prev=rows;
+      rows=rows.filter(r=>r._id!==id).concat([{_id:id,fecha,turno,horario,piezas:nPiezas,cliente:cliente,restante:nRestante,actualizado:new Date().toISOString()}]);
       try{persist();}catch(pe){rows=prev;throw pe;}
       render();stamp();
       msg(existed?`Actualizado: turno ${turno} ${horario.toLowerCase()} del ${fDate(fecha)}.`:`Guardado: turno ${turno} ${horario.toLowerCase()} del ${fDate(fecha)}.`,'ok');
-      $('fEv').value='';$('fFi').value='';$('fPo').value='';
+      $('fPiezas').value='';$('fCliente').value='';$('fRestante').value='';
     }catch(err){
-      msg('No se pudo guardar: el navegador bloquea el almacenamiento local. Revisa que no esté en modo incógnito.','err');
+      msg('No se pudo guardar: el navegador bloquea el almacenamiento local.','err');
     }finally{$('save').disabled=false;}
   });
 
@@ -323,18 +361,22 @@ td.low{color:var(--danger);font-weight:700}
   load();render();stamp();
   window.addEventListener('storage',ev=>{if(ev.key===KEY){load();render();stamp();}});
   setInterval(()=>render(),60000);
+  
   $('csvBtn').addEventListener('click',()=>{
     const o={'Mañana':0,'Noche':1};
     const s=[...rows].sort((a,b)=>a.fecha.localeCompare(b.fecha)||a.turno.localeCompare(b.turno)||o[a.horario]-o[b.horario]);
-    const lines=['Fecha;Turno;Horario;Piezas evisceradas;Piezas fileteadas;Porciones (kg);% fileteado'];
-    s.forEach(r=>lines.push([r.fecha,r.turno,r.horario,r.evisceradas,r.fileteadas,String(Number(r.porciones)||0).replace('.',','),r.evisceradas>0?(r.fileteadas/r.evisceradas*100).toFixed(1).replace('.',','):''].join(';')));
+    const lines=['Fecha;Turno;Horario;Piezas;Cliente;Restante (kg)'];
+    s.forEach(r=>lines.push([r.fecha,r.turno,r.horario,r.piezas,r.cliente,String(Number(r.restante)||0).replace('.',',')].join(';')));
     dl('Produccion_LlauLlao_'+isoLocal(new Date())+'.csv','\ufeff'+lines.join('\r\n'),'text/csv;charset=utf-8');
   });
+  
   $('bakBtn').addEventListener('click',()=>{dl('Respaldo_Produccion_LlauLlao_'+isoLocal(new Date())+'.json',localStorage.getItem(KEY)||'{}','application/json');msg('Respaldo descargado. Guárdalo en una carpeta compartida.','ok');});
+  
   $('impBtn').addEventListener('click',()=>$('imp').click());
   $('imp').addEventListener('change',async()=>{
     const f=$('imp').files[0];if(!f)return;
-    try{const o=JSON.parse(await f.text());if(typeof o!=='object'||Array.isArray(o))throw 0;
+    try{
+      const o=JSON.parse(await f.text());if(typeof o!=='object'||Array.isArray(o))throw 0;
       const cur=JSON.parse(localStorage.getItem(KEY)||'{}');let n=0;
       Object.keys(o).forEach(k=>{const r=o[k];if(r&&r.fecha&&/^\d{4}-\d{2}-\d{2}_[AB]_[MN]$/.test(k)){cur[k]=r;n++;}});
       localStorage.setItem(KEY,JSON.stringify(cur));load();render();stamp();msg(n+' registros restaurados desde el respaldo.','ok');
